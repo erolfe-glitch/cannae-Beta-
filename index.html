@@ -155,7 +155,7 @@ html, body { overflow: hidden; }
 .logbox li { padding-left: 10px; border-left: 2px solid var(--line); }
 .logbox li.R { border-color: var(--rome); } .logbox li.C { border-color: var(--carth); }
 .logbox li.turn { border: 0; padding: 4px 0 0; color: var(--bronze); font-family: var(--display); letter-spacing: .06em; }
-.hud { display: flex; align-items: center; gap: 12px; min-height: 108px; padding: 8px max(12px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); background: linear-gradient(#2a2319, #1a160f); border-top: 3px solid #0f0c08; }
+.hud { display: flex; align-items: center; gap: 12px; height: 116px; overflow: hidden; /* feste Höhe: sonst ändert sich das Schlachtfeld beim Überfahren mit der Maus */ padding: 8px max(12px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); background: linear-gradient(#2a2319, #1a160f); border-top: 3px solid #0f0c08; }
 .hud.R { box-shadow: inset 0 4px 0 var(--rome); } .hud.C { box-shadow: inset 0 4px 0 var(--carth); }
 #portrait { flex: none; width: 88px; height: 88px; border-radius: 8px; border: 3px solid #0f0c08; outline: 2px solid var(--line); }
 .hmain { flex: 1; min-width: 0; display: grid; gap: 5px; }
@@ -169,7 +169,9 @@ html, body { overflow: hidden; }
 .pill small { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .pill b { font-size: 17px; font-variant-numeric: tabular-nums; }
 .pill.gold b { color: #e5b94a; } .pill.bad b { color: #ff8f7a; }
-.hrow { display: flex; align-items: center; gap: 6px; min-height: 30px; min-width: 0; flex-wrap: wrap; font-size: 13px; }
+.hrow { display: flex; align-items: center; gap: 6px; height: 32px; min-width: 0; flex-wrap: nowrap; overflow: hidden; white-space: nowrap; font-size: 13px; }
+.hrow .hint { overflow: hidden; text-overflow: ellipsis; } .hrow > * { flex: none; } .hrow > .hint { flex: 0 1 auto; }
+.hstats { height: 48px; }
 .hrow .hint { font-size: 13px; }
 .hrow .btn { padding: 4px 10px; border-width: 2px; border-bottom-width: 4px; white-space: nowrap; }
 .hrow .btn.primary { width: auto; font-size: 14px; padding: 5px 14px; }
@@ -192,17 +194,17 @@ html, body { overflow: hidden; }
   .bar { padding-top: 3px; padding-bottom: 3px; flex-wrap: nowrap; gap: 4px 8px; } .brand { display: none; }
   .meters .meter { width: 104px; height: 18px; } .meters .meter span { font-size: 10px; }
   .tools .btn { padding: 2px 7px; font-size: 12px; border-bottom-width: 3px; } .chip { font-size: 11px; padding: 2px 7px; white-space: nowrap; } #turnNo { font-size: 13px; white-space: nowrap; }
-  .hud { min-height: 78px; gap: 8px; padding-top: 5px; padding-bottom: calc(5px + env(safe-area-inset-bottom, 0px)); }
+  .hud { height: 84px; gap: 8px; padding-top: 5px; padding-bottom: calc(5px + env(safe-area-inset-bottom, 0px)); }
   #portrait { width: 62px; height: 62px; } #hudName { font-size: 16px; } .hmain { gap: 3px; }
   .pill { min-width: 46px; padding: 0 6px 1px; } .pill b { font-size: 14px; } .pill small { font-size: 9px; }
-  .hrow { min-height: 24px; flex-wrap: nowrap; overflow: hidden; white-space: nowrap; font-size: 12px; } .hrow .hint { font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
+  .hrow { height: 24px; font-size: 12px; } .hstats { height: 34px; } .hrow .hint { font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
   .hbtns .btn.primary { min-width: 124px; height: 48px; font-size: 15px; } .hbtns .btn { font-size: 12px; padding: 3px 8px; }
 }
 @media (orientation: portrait) {
   html, body { overflow: auto; }
   .app { height: auto; min-height: 100%; }
   .meters { margin-left: 0; width: 100%; } .meters .meter { flex: 1; width: auto; }
-  .hud { position: sticky; bottom: 0; z-index: 8; flex-wrap: wrap; }
+  .hud { position: sticky; bottom: 0; z-index: 8; flex-wrap: wrap; height: auto; }
   .hmain { flex-basis: 55%; } #hudSub { display: none; } .hstats { flex-wrap: wrap; } .pill { min-width: 50px; }
   .hbtns { width: 100%; grid-auto-flow: column; grid-auto-columns: 1fr; } .hbtns .btn.primary { height: 48px; min-width: 0; }
 }
@@ -790,6 +792,10 @@ function hexAt(x, y) {
 function pickHex(x, y) {
   const h = hexAt(x, y);
   if (!G) return h;
+  // Zuerst zählt die Figur, die man an dieser Stelle sieht (vorderste Einheit), dann erst das Feld darunter
+  { let f = null, fy = -1e9;
+    for (const u of G.units) { if (!alive(u) || u.gone) continue; const [ux, uy] = hexPx(u.c, u.r); if (Math.abs(x - ux) < S * .46 && y < uy + S * SQ * .25 && y > uy - S * .9 && uy > fy) { fy = uy; f = u; } }
+    if (f) return { c: f.c, r: f.r }; }
   if (h && unitAt(G, h.c, h.r)) return h;
   if (h && sel && reach) { const n = reach.get(h.c * 100 + h.r); if (n && !n.occ && n.cost > 0) return h; }
   let best = null, by = -1e9;
@@ -803,7 +809,7 @@ function resize() {
   const b = cv.getBoundingClientRect();
   DPR = Math.min(2, window.devicePixelRatio || 1);
   cv.width = Math.round(b.width * DPR); cv.height = Math.round(b.height * DPR);
-  SQ = Math.max(0.38, Math.min(0.66, ((b.height - 4) * (MAPH + 2 * MARGX) / (b.width - 4) - MARGT - MARGB) / MAPW));
+  SQ = Math.max(matchMedia('(max-height: 520px)').matches ? 0.38 : 0.45, Math.min(0.66, ((b.height - 4) * (MAPH + 2 * MARGX) / (b.width - 4) - MARGT - MARGB) / MAPW));
   const SH = MAPW * SQ;
   S = Math.min((b.width - 4) / (MAPH + 2 * MARGX), (b.height - 4) / (SH + MARGT + MARGB));
   OX = (b.width - S * MAPH) / 2; OY = (b.height - S * (SH + MARGT + MARGB)) / 2 + S * MARGT;
