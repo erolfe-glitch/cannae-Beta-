@@ -25,6 +25,10 @@ Die Spiellogik beginnt beim Abschnitt `// ===== CANNAE ENGINE`, die Oberfläche 
 
 ## Stand
 
-Beta. Feld 26 × 16, Reiterei löst sich frei von Infanterie, Regel „Schildwall“
-(Infanterie frontal gegen Infanterie nur 65 % Schaden). Laut Simulation gewinnt Karthago mit
-Hannibals Plan fast immer, ohne Flügel und Reiterei fast nie.
+Beta. Feld 26 × 16. Oberfläche wie bei Armargeddon: Schlachtfeld füllt den Bildschirm, schmale Statusleiste oben,
+Einheitenkarte mit Bild unten, Ereignisse werden kurz eingeblendet, der ganze Bericht steht hinter dem Knopf „Bericht“.
+
+- **Aufstellungsphase** vor jeder Schlacht: historische Aufstellung übernehmen oder frei verschieben.
+- **Kräfteverhältnis** wählbar:
+  - Historisch: KI gegen KI gewinnt Karthago 86 %, Rom 14 % (200 Schlachten).
+  - Ausgeglichen: Roms Heer hält länger durch (bricht erst bei 80 % statt 65 % Ausfällen). KI gegen KI: Rom 48 %, Karthago 53 %.

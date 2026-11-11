@@ -132,29 +132,107 @@ button:focus-visible, input:focus-visible, label:focus-within { outline: 2px sol
 }
 @media (min-width: 1500px) { .stage { grid-template-columns: minmax(0, 1fr) 340px; } body { font-size: 16px; } }
 @media (prefers-reduced-motion: reduce) { .meter .fill { transition: none; } .evcard { animation: none; } }
+
+/* Neues Layout: Schlachtfeld füllt den Bildschirm, Statusleiste oben, Einheitenkarte unten */
+html, body { overflow: hidden; }
+.app { grid-template-rows: auto minmax(0, 1fr) auto; height: 100vh; height: 100dvh; }
+.bar { padding-top: 6px; padding-bottom: 6px; gap: 6px 14px; border-bottom: 3px solid #0f0c08; }
+.turninfo { margin-right: 0; }
+.meters { display: flex; gap: 8px; margin-left: auto; }
+.meters .meter { position: relative; display: block; width: 170px; height: 22px; margin: 0; border-radius: 5px; background: #120f0b; border: 2px solid #0f0c08; overflow: hidden; }
+.meters .meter .fill { position: absolute; inset: 0 auto 0 0; border-radius: 0; }
+.meters .meter .mark { position: absolute; top: 0; bottom: 0; width: 3px; background: #fff; mix-blend-mode: difference; }
+.meters .meter span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px #000, 0 0 3px #000; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tools .btn { border-width: 2px; border-bottom-width: 4px; padding: 4px 10px; }
+.tools .btn:active { border-bottom-width: 2px; transform: translateY(2px); }
+.board { overflow: hidden; }
+.toast { position: absolute; left: 50%; bottom: 12px; transform: translate(-50%, 8px); max-width: min(92%, 560px); padding: 7px 14px; border-radius: 8px; background: rgba(22,19,14,.92); border: 2px solid var(--line); font-size: 14px; text-align: center; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 4; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+.toast.R { border-color: var(--rome); } .toast.C { border-color: var(--carth); }
+.logbox { position: absolute; right: 10px; top: 10px; bottom: 10px; width: min(330px, 80%); z-index: 6; overflow-y: auto; padding: 12px 14px; border-radius: 10px; background: rgba(24,20,14,.96); border: 2px solid var(--line); }
+.logbox h3 { margin: 0 0 8px; font-family: var(--display); font-weight: 400; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.logbox ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 13px; }
+.logbox li { padding-left: 10px; border-left: 2px solid var(--line); }
+.logbox li.R { border-color: var(--rome); } .logbox li.C { border-color: var(--carth); }
+.logbox li.turn { border: 0; padding: 4px 0 0; color: var(--bronze); font-family: var(--display); letter-spacing: .06em; }
+.hud { display: flex; align-items: center; gap: 12px; min-height: 108px; padding: 8px max(12px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); background: linear-gradient(#2a2319, #1a160f); border-top: 3px solid #0f0c08; }
+.hud.R { box-shadow: inset 0 4px 0 var(--rome); } .hud.C { box-shadow: inset 0 4px 0 var(--carth); }
+#portrait { flex: none; width: 88px; height: 88px; border-radius: 8px; border: 3px solid #0f0c08; outline: 2px solid var(--line); }
+.hmain { flex: 1; min-width: 0; display: grid; gap: 5px; }
+.hhead { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+#hudName { font-family: var(--display); font-size: 21px; letter-spacing: .04em; white-space: nowrap; }
+#hudSub { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#btnInfo { margin-left: auto; flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--panel-2); border: 2px solid var(--bronze-soft); font-weight: 800; }
+#btnInfo:hover { border-color: var(--bronze); }
+.hstats { display: flex; gap: 6px; overflow: hidden; }
+.pill { display: grid; justify-items: center; min-width: 60px; padding: 2px 8px 3px; background: #120f0b; border: 2px solid #0f0c08; border-radius: 6px; }
+.pill small { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.pill b { font-size: 17px; font-variant-numeric: tabular-nums; }
+.pill.gold b { color: #e5b94a; } .pill.bad b { color: #ff8f7a; }
+.hrow { display: flex; align-items: center; gap: 6px; min-height: 30px; min-width: 0; flex-wrap: wrap; font-size: 13px; }
+.hrow .hint { font-size: 13px; }
+.hrow .btn { padding: 4px 10px; border-width: 2px; border-bottom-width: 4px; white-space: nowrap; }
+.hrow .btn.primary { width: auto; font-size: 14px; padding: 5px 14px; }
+.hrow .pv { color: #ffc9b0; font-weight: 700; } .hrow .pv b { font-size: 17px; color: #fff; }
+.hbtns { flex: none; display: grid; gap: 6px; justify-items: stretch; }
+.hbtns .btn { white-space: nowrap; }
+.hbtns .btn.primary { width: auto; min-width: 180px; height: 58px; font-size: 18px; letter-spacing: .04em; border: 3px solid #f0cf8a; border-bottom: 7px solid #7a5a22; border-radius: 10px; }
+.hbtns .btn.primary:active { border-bottom-width: 3px; transform: translateY(4px); }
+#detail { align-items: center; }
+.dbox { width: min(560px, 100%); display: grid; grid-template-columns: auto 1fr; gap: 14px; padding: 18px 20px; border-radius: 12px; background: var(--panel); border: 2px solid var(--line); }
+.dbox canvas { width: 120px; height: 120px; border-radius: 8px; border: 3px solid #0f0c08; }
+.dbox h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 24px; }
+.dbox p { margin: 6px 0 0; font-size: 14px; } .dbox .info { font-size: 14px; }
+@media (max-width: 1000px) { .meters .meter { width: 120px; } .brand .eyebrow { display: none; } }
+@media (max-width: 900px) and (orientation: landscape) {
+  .app { height: 100vh; height: 100dvh; min-height: 0; }
+  .board { height: auto; overflow: hidden; } #map { width: 100%; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  .bar { padding-top: 3px; padding-bottom: 3px; flex-wrap: nowrap; gap: 4px 8px; } .brand { display: none; }
+  .meters .meter { width: 104px; height: 18px; } .meters .meter span { font-size: 10px; }
+  .tools .btn { padding: 2px 7px; font-size: 12px; border-bottom-width: 3px; } .chip { font-size: 11px; padding: 2px 7px; white-space: nowrap; } #turnNo { font-size: 13px; white-space: nowrap; }
+  .hud { min-height: 78px; gap: 8px; padding-top: 5px; padding-bottom: calc(5px + env(safe-area-inset-bottom, 0px)); }
+  #portrait { width: 62px; height: 62px; } #hudName { font-size: 16px; } .hmain { gap: 3px; }
+  .pill { min-width: 46px; padding: 0 6px 1px; } .pill b { font-size: 14px; } .pill small { font-size: 9px; }
+  .hrow { min-height: 24px; flex-wrap: nowrap; overflow: hidden; white-space: nowrap; font-size: 12px; } .hrow .hint { font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
+  .hbtns .btn.primary { min-width: 124px; height: 48px; font-size: 15px; } .hbtns .btn { font-size: 12px; padding: 3px 8px; }
+}
+@media (orientation: portrait) {
+  html, body { overflow: auto; }
+  .app { height: auto; min-height: 100%; }
+  .meters { margin-left: 0; width: 100%; } .meters .meter { flex: 1; width: auto; }
+  .hud { position: sticky; bottom: 0; z-index: 8; flex-wrap: wrap; }
+  .hmain { flex-basis: 55%; } #hudSub { display: none; } .hstats { flex-wrap: wrap; } .pill { min-width: 50px; }
+  .hbtns { width: 100%; grid-auto-flow: column; grid-auto-columns: 1fr; } .hbtns .btn.primary { height: 48px; min-width: 0; }
+}
 </style>
 
 <div class="app" id="app">
   <header class="bar">
     <div class="brand"><h1>Cannae</h1><span class="eyebrow">216 v. Chr.</span></div>
     <div class="turninfo"><span id="turnNo">Runde 1 / 16</span><span id="sideChip" class="chip R">Rom</span></div>
+    <div id="meters" class="meters"></div>
     <div class="tools">
-      <button class="btn" id="btnSpeed" title="Animationstempo">Tempo 1×</button>
-      <button class="btn" id="btnFull">Vollbild</button>
+      <button class="btn" id="btnSpeed" title="Animationstempo">1×</button>
+      <button class="btn" id="btnLog" title="Schlachtbericht">Bericht</button>
+      <button class="btn" id="btnFull" title="Vollbild">⛶</button>
       <button class="btn" id="btnMenu">Menü</button>
     </div>
   </header>
-  <main class="stage">
-    <div class="board" id="board"><canvas id="map" aria-label="Schlachtfeld von Cannae"></canvas><div id="banner" class="banner" hidden></div><div id="evcard" class="evcard" hidden></div></div>
-    <div id="tip" class="tip"></div>
-    <aside class="panel">
-      <section><h3>Kampfbereit</h3><div id="meters"></div></section>
-      <section id="unitCard"></section>
-      <section class="actions"><button class="btn" id="btnUndo" hidden>↶ Letzten Zug zurücknehmen</button><button class="btn primary" id="btnEnd">Runde beenden</button></section>
-      <section class="log"><h3>Schlachtbericht</h3><ol id="log"></ol></section>
-    </aside>
-  </main>
+  <main class="board" id="board"><canvas id="map" aria-label="Schlachtfeld von Cannae"></canvas><div id="banner" class="banner" hidden></div><div id="evcard" class="evcard" hidden></div><div id="toast" class="toast"></div>
+    <aside id="logBox" class="logbox" hidden><h3>Schlachtbericht</h3><ol id="log"></ol></aside></main>
+  <footer class="hud" id="hud">
+    <canvas id="portrait" hidden></canvas>
+    <div class="hmain">
+      <div class="hhead"><span id="hudName"></span><span id="hudSub"></span><button id="btnInfo" title="Mehr über diese Einheit" hidden>i</button></div>
+      <div class="hstats" id="hudStats"></div>
+      <div class="hrow" id="hudRow"></div>
+    </div>
+    <div class="hbtns"><button class="btn" id="btnUndo" hidden>↶ Zug zurück</button><button class="btn primary" id="btnEnd">Runde beenden</button></div>
+  </footer>
 </div>
+<div class="overlay" id="detail" hidden></div>
 <div class="overlay" id="overlay"></div>
 
 <script>
@@ -252,6 +330,7 @@ function newGame(rng) {
   G.init = { R:0, C:0 }; for (const u of G.units) G.init[u.side] += TYPES[u.type].men;
   return G;
 }
+function setBalance(m) { BREAK.R = m === 'even' ? 0.8 : 0.65; } // 'even': Roms Heer hält länger durch (KI gegen KI etwa 50:50)
 function finishDeploy(G) { for (const u of G.units) { u.home = u.c; u.cmd = u.c <= 12 ? 'A' : 'B'; } }
 
 const alive = u => u.status === 'ok' || u.status === 'routed';
@@ -660,7 +739,7 @@ function aiOrder(G, side, cmd) {
     .sort((a, b) => a.d - b.d).map(x => x.u);
 }
 
-if (typeof module !== 'undefined') module.exports = { setDmg: v => DMG = v, setFI: v => FI = v, BREAK, newGame, startTurn, endTurn, aiAct, aiOrder, lostFrac, milestones, TYPES };
+if (typeof module !== 'undefined') module.exports = { setBalance, setDmg: v => DMG = v, setFI: v => FI = v, BREAK, newGame, startTurn, endTurn, aiAct, aiOrder, lostFrac, milestones, TYPES };
 
 
 // ===== UI =====
@@ -681,10 +760,11 @@ const STYLE = {
 };
 const PLATE = { R:{ ring:'#e8392c', dark:'#6a120d', tint:'rgba(232,57,44,.24)', edge:'#ffd9a0', front:'#fff4a8' }, C:{ ring:'#2f86ea', dark:'#0d3672', tint:'rgba(47,134,234,.24)', edge:'#d6e8ff', front:'#f2fbff' } };
 // Ansicht: Karte um 90° gedreht (Karthago links, Rom rechts, Fluss hinten) und in der Tiefe gestaucht
-const SQ = 0.66, MARGX = 1.7, MARGT = 0.45, MARGB = 1.0;
+let SQ = 0.66; // Tiefenstauchung, passt sich in resize() dem Bildschirm an
+const MARGX = 1.2, MARGT = 0.45, MARGB = 1.0;
 const MAPW = 1.5 * COLS + 0.5, MAPH = SQ3 * (ROWS + 0.5);
 
-let G = null, mode = 'solo-C', deployMode = 'hist', humans = new Set(['C']), busy = false, sel = null, reach = null, tgts = [], pending = null, hover = null;
+let G = null, mode = 'solo-C', balance = 'hist', humans = new Set(['C']), busy = false, sel = null, reach = null, tgts = [], pending = null, hover = null;
 let undoStack = [], deploying = null, deployDone = null, evQueue = [];
 let blood = true, speed = 1, S = 20, OX = 0, OY = 0, DPR = 1;
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -723,6 +803,7 @@ function resize() {
   const b = cv.getBoundingClientRect();
   DPR = Math.min(2, window.devicePixelRatio || 1);
   cv.width = Math.round(b.width * DPR); cv.height = Math.round(b.height * DPR);
+  SQ = Math.max(0.38, Math.min(0.66, ((b.height - 4) * (MAPH + 2 * MARGX) / (b.width - 4) - MARGT - MARGB) / MAPW));
   const SH = MAPW * SQ;
   S = Math.min((b.width - 4) / (MAPH + 2 * MARGX), (b.height - 4) / (SH + MARGT + MARGB));
   OX = (b.width - S * MAPH) / 2; OY = (b.height - S * (SH + MARGT + MARGB)) / 2 + S * MARGT;
@@ -1227,7 +1308,8 @@ async function playEvent(e) {
 }
 
 // --- UI updates
-function addLog(side, text) { logItems.unshift({ side, text }); logItems = logItems.slice(0, 60); renderLog(); }
+function addLog(side, text) { logItems.unshift({ side, text }); logItems = logItems.slice(0, 60); renderLog(); if (text) toast(side, text); }
+function toast(side, html) { const t = $('#toast'); t.innerHTML = html; t.className = 'toast on ' + side; clearTimeout(toast.t); toast.t = setTimeout(() => { t.className = 'toast ' + side; }, 2800); }
 function renderLog() { $('#log').innerHTML = logItems.map(l => `<li class="${l.side}">${l.text}</li>`).join(''); }
 function updateUI() {
   if (!G) return;
@@ -1236,38 +1318,55 @@ function updateUI() {
   chip.textContent = deploying ? 'Aufstellung · ' + SIDE[deploying] : SIDE[G.side] + (humans.has(G.side) ? '' : ' (KI)') + (isCoop() && humans.has(G.side) ? ' · ' + (G.phase === 'A' ? 'Spieler 1' : 'Spieler 2') : '');
   $('#meters').innerHTML = ['R', 'C'].map(s => {
     const ok = 1 - lostFrac(G, s), men = G.init[s] * ok;
-    return `<div class="meter ${s}"><div class="row"><span>${SIDE[s]}</span><span>≈ ${fmt(Math.round(men / 100) * 100)} Mann · ${Math.round(ok * 100)} %</span></div>
-      <div class="track"><div class="fill" style="width:${Math.max(0, ok * 100)}%"></div><div class="mark" style="left:${(1 - BREAK[s]) * 100}%" title="Hier bricht das Heer"></div></div></div>`;
-  }).join('') + `<div class="hint" style="font-size:12px">Rote Marke: Unter diesem Wert bricht das Heer zusammen.</div>`;
+    return `<div class="meter ${s}" title="${SIDE[s]}: ≈ ${fmt(Math.round(men / 100) * 100)} Mann kampfbereit. An der Marke bricht das Heer zusammen."><div class="fill" style="width:${Math.max(0, ok * 100)}%"></div><div class="mark" style="left:${(1 - BREAK[s]) * 100}%"></div><span>${SIDE[s]} ${Math.round(ok * 100)} %</span></div>`;
+  }).join('');
   $('#btnEnd').disabled = deploying ? busy : (busy || !humans.has(G.side) || !!G.over);
-  $('#btnEnd').textContent = deploying ? 'Aufstellung fertig' : isCoop() && humans.has(G.side) && G.phase === 'A' ? 'Weiter an Spieler 2' : 'Runde beenden';
+  $('#btnEnd').textContent = deploying ? 'Schlacht beginnen' : isCoop() && humans.has(G.side) && G.phase === 'A' ? 'Weiter an Spieler 2' : 'Runde beenden';
   $('#btnUndo').hidden = !(undoStack.length && !busy && !deploying && humans.has(G.side) && !G.over);
   renderCard();
 }
 function chip(text, cls = '') { return `<span class="tag ${cls}">${text}</span>`; }
-function renderTip(u) { // Werte-Leiste unter der Karte (Hochformat); im Querformat zeigt das Seitenpanel dasselbe
-  const tip = $('#tip');
-  if (!u || !alive(u)) { tip.className = 'tip none'; tip.textContent = deploying ? 'Aufstellung: Einheit antippen, dann ein freies helles Feld. Zwei eigene Einheiten nacheinander tauschen die Plätze.' : busy ? 'Die Truppen bewegen sich …' : 'Tippe eine Einheit an, um ihre Werte zu sehen.'; return; }
-  const T = TYPES[u.type], own = !deploying && u.side === G.side && u.status === 'ok' && humans.has(u.side);
-  tip.className = 'tip ' + u.side;
-  tip.innerHTML = `<b>${T.name}${u.leader ? ' · ★ ' + (LEADERS[u.leader] ? LEADERS[u.leader].full : u.leader) : ''}</b><span>Stärke ${dec(u.str)}/10 · Moral ${dec(Math.max(0, u.mor))}/${T.mor}</span><span>Angriff ${T.atk} · Abwehr ${T.def} · Bewegung ${own ? Math.max(0, u.mp) + ' von ' : ''}${T.mv}${T.rng ? ' · Reichweite ' + T.rng : ''}</span><i>${T.can}</i>`;
+function drawPortrait(c, u) {
+  const d = Math.min(2, window.devicePixelRatio || 1), w = c.clientWidth || 88, h = c.clientHeight || 88;
+  c.width = w * d; c.height = h * d;
+  const x = c.getContext('2d'), W = c.width, H = c.height;
+  const g = x.createRadialGradient(W / 2, H * .55, W * .1, W / 2, H * .55, W * .75);
+  g.addColorStop(0, u.side === 'R' ? '#a8584a' : '#4f7fb5'); g.addColorStop(1, '#1d1811');
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.fillStyle = 'rgba(0,0,0,.28)'; x.beginPath(); x.ellipse(W / 2, H * .88, W * .34, H * .06, 0, 0, 7); x.fill();
+  const sp = SPR[u.type] && SPR[u.type][0]; if (!sp) return;
+  const k = Math.min(W * .9 / sp.img.width, H * .84 / sp.img.height);
+  x.drawImage(sp.img, (W - sp.img.width * k) / 2, H * .92 - sp.img.height * k, sp.img.width * k, sp.img.height * k);
+}
+const pill = (k, v, cls = '') => `<div class="pill ${cls}"><small>${k}</small><b>${v}</b></div>`;
+function showDetail(u) {
+  const T = TYPES[u.type], o = $('#detail');
+  o.innerHTML = `<div class="dbox"><canvas id="detP"></canvas><div><h3>${T.name}</h3><span class="eyebrow">${SIDE[u.side]}${u.leader ? ' · ★ ' + (LEADERS[u.leader] ? LEADERS[u.leader].full : u.leader) : ''}</span>
+    <p><b>Kann:</b> ${T.can}</p><p class="info">${T.info}${u.leader && LEADERS[u.leader] ? ' ' + LEADERS[u.leader].info : ''}</p>
+    <p><button class="btn" id="detClose">Schließen</button></p></div></div>`;
+  o.hidden = false; requestAnimationFrame(() => drawPortrait($('#detP'), u));
+  $('#detClose').onclick = () => { o.hidden = true; }; o.onclick = e => { if (e.target === o) o.hidden = true; };
 }
 function renderCard() {
   const u = sel || (hover && unitAt(G, hover.c, hover.r)) || null;
-  renderTip(u);
-  const box = $('#unitCard');
-  if (deploying && !sel) {
-    box.innerHTML = `<h3>Aufstellung · ${SIDE[deploying]}</h3><div class="card"><div class="hint">Tippe eine eigene Einheit an, dann ein freies Feld im hellen Bereich. Tippst du danach eine zweite eigene Einheit an, tauschen beide die Plätze.</div>
-      <button class="btn" id="btnHist">Historische Aufstellung wiederherstellen</button></div>`;
-    $('#btnHist').onclick = () => resetDeploy(deploying);
-    return;
-  }
-  if (!u) {
-    box.innerHTML = `<h3>Einheit</h3><div class="hint">${humans.has(G.side) && !busy ? 'Tippe eine eigene Einheit an.' : 'Die KI führt ihre Truppen …'}</div>
-      <ul class="legend"><li><span style="background:#ffd57e"></span>Helle Kante = Front der Einheit</li><li><span style="background:#f2c65a"></span>Goldener Ring + Standarte = Feldherr</li><li><span style="background:#ffffff"></span>Helle Felder = Bewegung, die Zahl zeigt die Schritte</li><li><span style="background:#e8392c"></span>Ring: Rom rot, Karthago blau</li><li><span style="background:#ff5a3c"></span>Rot = Nahkampfziel, Orange = Fernkampf</li><li><span style="background:#d9b44a"></span>Balken: Stärke (hell) und Moral (gold)</li></ul>`;
+  const hud = $('#hud'), pc = $('#portrait'), row = $('#hudRow');
+  if (!u || !alive(u)) {
+    hud.className = 'hud ' + (deploying || ''); pc.hidden = true; $('#btnInfo').hidden = true; $('#hudStats').innerHTML = '';
+    if (deploying) {
+      $('#hudName').textContent = 'Aufstellung · ' + SIDE[deploying];
+      $('#hudSub').textContent = 'Vor der Schlacht';
+      row.innerHTML = `<button class="btn" id="btnHist">Historische Aufstellung</button><span class="hint">So lassen oder frei aufstellen: Einheit antippen, dann ein freies helles Feld. Zwei eigene Einheiten nacheinander tauschen die Plätze.</span>`;
+      $('#btnHist').onclick = () => resetDeploy(deploying);
+    } else {
+      $('#hudName').textContent = G.over ? 'Schlacht beendet' : humans.has(G.side) ? SIDE[G.side] : SIDE[G.side] + ' (KI)';
+      $('#hudSub').textContent = `Runde ${Math.min(G.turn, G.maxTurn)} von ${G.maxTurn}`;
+      row.innerHTML = `<span class="hint">${humans.has(G.side) && !busy ? 'Tippe eine eigene Einheit an. Helle Felder: ziehen. Rot: Nahkampf, Orange: Fernkampf. Die helle Kante ist die Front.' : 'Die Truppen bewegen sich …'}</span>`;
+    }
     return;
   }
   const T = TYPES[u.type], tags = [];
+  hud.className = 'hud ' + u.side; pc.hidden = false; drawPortrait(pc, u);
+  $('#btnInfo').hidden = false; $('#btnInfo').onclick = () => showDetail(u);
   if (u.status === 'routed') tags.push(chip('Fliehend', 'bad'));
   else if (u.status === 'ok') {
     if (surrounded(G, u)) tags.push(chip('Umzingelt', 'bad'));
@@ -1278,34 +1377,23 @@ function renderCard() {
   }
   const mine = (selectable(u) || (deploying && u.side === deploying)) && sel === u;
   const canRot = mine && (deploying || canRotate(u));
-  const mpl = mine && !deploying && u.status === 'ok' ? `<div class="mpline">Bewegungspunkte: <b>${Math.max(0, u.mp)}</b> von ${T.mv}${u.mp > 0 && pinnedNow(G, u) ? ' · im Feindkontakt nur 1 Feld' : ''}${u.attacked ? ' · hat gekämpft' : ''}</div>` : '';
-  let prev = '';
-  const pt = pending || (hover && tgts.find(t => t.u === unitAt(G, hover.c, hover.r)) ? unitAt(G, hover.c, hover.r) : null);
-  if (sel && pt) {
-    const t = tgts.find(x => x.u === pt);
-    if (t) {
-      const k = t.kind === 'shoot' ? shootCalc(G, sel, pt) : meleeCalc(G, sel, pt);
-      const arcTxt = t.kind === 'shoot' ? 'Fernkampf' : pt.status === 'routed' ? 'Verfolgung' : k.arc === 'rear' ? 'Angriff in den Rücken' : k.arc === 'flank' ? 'Angriff in die Flanke' : 'Frontalangriff';
-      prev = `<div class="preview"><strong>${arcTxt}: ${TYPES[pt.type].name}</strong>
-        <div>Erwarteter Schaden ≈ <b>${dec(k.base)}</b>${k.cbase > .05 ? ` · Gegenschlag ≈ <b>${dec(k.cbase)}</b>` : ' · kein Gegenschlag'}</div>
-        ${k.tags.length ? `<div class="tags">${k.tags.map(x => chip(x, /×0/.test(x) ? 'warn' : 'good')).join('')}</div>` : ''}
-        ${pending === pt ? '<button class="btn primary" id="btnAtk">Angreifen</button>' : ''}</div>`;
-    }
-  }
   const men = Math.round(u.str / 10 * T.men / 100) * 100;
-  box.innerHTML = `<h3>${u.side === 'R' ? 'Rom' : 'Karthago'}${u.side === (deploying || G.side) ? '' : ' · Gegner'}</h3><div class="card">
-    <div><div class="name">${T.name}</div><div class="sub">≈ ${fmt(men)} Mann${u.leader ? ` · <span class="lead-tag">★ ${LEADERS[u.leader] ? LEADERS[u.leader].full : u.leader}</span>` : ''}</div></div>
-    <div class="stat"><span>Stärke</span><div class="track"><div class="fill" style="width:${u.str * 10}%;background:#eee4cc"></div></div><span>${dec(u.str)}/10</span></div>
-    <div class="stat"><span>Moral</span><div class="track"><div class="fill" style="width:${Math.max(0, u.mor) / T.mor * 100}%;background:#d9b44a"></div></div><span>${dec(Math.max(0, u.mor))}/${T.mor}</span></div>
-    <div class="nums"><span>Angriff <b>${T.atk}</b></span><span>Abwehr <b>${T.def}</b></span><span>Bewegung <b>${T.mv}</b></span>${T.rng ? `<span>Reichweite <b>${T.rng}</b></span>` : ''}</div>
-    ${tags.length ? `<div class="tags">${tags.join('')}</div>` : ''}
-    ${mpl}
-    <div class="can"><b>Kann:</b> ${T.can}</div>
-    <div class="info">${T.info}${u.leader && LEADERS[u.leader] ? ' ' + LEADERS[u.leader].info : ''}</div>
-    ${canRot ? `<div class="rot"><button class="btn" id="rotL" title="Gegen den Uhrzeigersinn drehen">⟲ Drehen</button><button class="btn" id="rotR" title="Im Uhrzeigersinn drehen">Drehen ⟳</button></div>` : ''}
-  </div>${prev}`;
+  $('#hudName').textContent = T.name;
+  $('#hudSub').innerHTML = `${SIDE[u.side]}${u.side === (deploying || G.side) ? '' : ' · Gegner'} · ≈ ${fmt(men)} Mann${u.leader ? ` · <span class="lead-tag">★ ${LEADERS[u.leader] ? LEADERS[u.leader].full : u.leader}</span>` : ''}`;
+  $('#hudStats').innerHTML = pill('Stärke', dec(u.str), u.str <= 3.3 ? 'bad' : '') + pill('Moral', dec(Math.max(0, u.mor)), u.mor < 3 ? 'bad' : 'gold') + pill('Angriff', T.atk) + pill('Abwehr', T.def) +
+    pill('Zug', mine && !deploying ? `${Math.max(0, u.mp)}/${T.mv}` : T.mv) + pill('Schuss', T.rng ? T.rng : '–');
+  const pt = pending || (hover && tgts.find(t => t.u === unitAt(G, hover.c, hover.r)) ? unitAt(G, hover.c, hover.r) : null);
+  const t = sel && pt ? tgts.find(x => x.u === pt) : null;
+  if (t) {
+    const k = t.kind === 'shoot' ? shootCalc(G, sel, pt) : meleeCalc(G, sel, pt);
+    const arcTxt = t.kind === 'shoot' ? 'Fernkampf' : pt.status === 'routed' ? 'Verfolgung' : k.arc === 'rear' ? 'Angriff in den Rücken' : k.arc === 'flank' ? 'Angriff in die Flanke' : 'Frontalangriff';
+    row.innerHTML = `<span class="pv">${arcTxt} → ${TYPES[pt.type].name}</span><span class="pv">Schaden ≈ <b>${dec(k.base)}</b></span><span class="pv">${k.cbase > .05 ? `Gegenschlag ≈ <b>${dec(k.cbase)}</b>` : 'kein Gegenschlag'}</span>${k.tags.map(x => chip(x, /×0/.test(x) ? 'warn' : 'good')).join('')}${pending === pt ? '<button class="btn primary" id="btnAtk">Angreifen</button>' : ''}`;
+    const ba = $('#btnAtk'); if (ba) ba.onclick = () => { const tt = tgts.find(x => x.u === pending); if (tt) humanAttack(tt); };
+    return;
+  }
+  row.innerHTML = (canRot ? `<button class="btn" id="rotL" title="Gegen den Uhrzeigersinn drehen">⟲ Drehen</button><button class="btn" id="rotR" title="Im Uhrzeigersinn drehen">Drehen ⟳</button>` : '') + tags.join('') +
+    (mine && !deploying && u.mp > 0 && pinnedNow(G, u) ? '<span class="hint">Im Feindkontakt nur 1 Feld.</span>' : '') + (mine ? '' : `<span class="hint">${T.can}</span>`);
   if (canRot) { $('#rotL').onclick = () => rot(-1); $('#rotR').onclick = () => rot(1); }
-  const ba = $('#btnAtk'); if (ba) ba.onclick = () => { const t = tgts.find(x => x.u === pending); if (t) humanAttack(t); };
 }
 
 // --- selection & input
@@ -1387,7 +1475,8 @@ $('#btnEnd').onclick = () => {
   if (deploying) { const d = deployDone; deployDone = null; deploying = null; sel = null; d && d(); return; }
   if (busy || !humans.has(G.side)) return; undoStack = []; deselect(); nextTurn();
 };
-$('#btnSpeed').onclick = () => { speed = speed >= 3 ? 1 : speed + 1; $('#btnSpeed').textContent = `Tempo ${speed}×`; };
+$('#btnSpeed').onclick = () => { speed = speed >= 3 ? 1 : speed + 1; $('#btnSpeed').textContent = `${speed}×`; };
+$('#btnLog').onclick = () => { $('#logBox').hidden = !$('#logBox').hidden; };
 $('#btnFull').onclick = () => { const el = document.documentElement; (document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen?.())?.catch?.(() => {}); };
 $('#btnMenu').onclick = () => showStart(true);
 document.addEventListener('fullscreenchange', () => setTimeout(resize, 50));
@@ -1458,10 +1547,10 @@ function showStart(fromMenu) {
       ${[['solo-C', 'Als Hannibal', 'Du führst Karthago, die KI führt Rom.'], ['solo-R', 'Als Varro & Paullus', 'Du führst Rom, die KI führt Karthago.'], ['hot', '2 Spieler: gegeneinander', 'Rom gegen Karthago an einem Gerät.'], ['coop-C', '2 Spieler: gemeinsam Karthago', 'Ihr teilt die Flügel und müsst euch absprechen.'], ['coop-R', '2 Spieler: gemeinsam Rom', 'Ihr teilt die Flügel gegen Hannibals KI.']]
         .map(([v, b, s]) => `<label class="mode"><input type="radio" name="mode" value="${v}" ${v === mode ? 'checked' : ''}><b>${b}</b><span>${s}</span></label>`).join('')}
     </div></div>
-    <div><h3 style="font-family:var(--display);font-weight:400;letter-spacing:.12em;text-transform:uppercase;font-size:13px;color:var(--muted);margin:0 0 8px">Aufstellung</h3>
+    <div><h3 style="font-family:var(--display);font-weight:400;letter-spacing:.12em;text-transform:uppercase;font-size:13px;color:var(--muted);margin:0 0 8px">Kräfteverhältnis</h3>
     <div class="modes">
-      ${[['hist', 'Historisch', 'Die Truppen stehen so wie am 2. August 216 v. Chr.'], ['own', 'Eigene Aufstellung', 'Du verschiebst deine Einheiten vor der Schlacht in deinem Bereich.']]
-        .map(([v, b, s]) => `<label class="mode"><input type="radio" name="dep" value="${v}" ${v === deployMode ? 'checked' : ''}><b>${b}</b><span>${s}</span></label>`).join('')}
+      ${[['hist', 'Historisch', 'Wie 216 v. Chr.: Hannibal ist im Vorteil, als Rom ist es schwer.'], ['even', 'Ausgeglichen', 'Roms Heer hält länger durch. Beide Seiten haben etwa gleiche Chancen.']]
+        .map(([v, b, s]) => `<label class="mode"><input type="radio" name="bal" value="${v}" ${v === balance ? 'checked' : ''}><b>${b}</b><span>${s}</span></label>`).join('')}
     </div></div>
     <ul class="rules">
       <li>Einheit antippen: Ihre Werte stehen neben oder unter der Karte. Helle Felder zeigen, wohin sie ziehen kann, die Zahl sind die Schritte.</li>
@@ -1484,17 +1573,17 @@ function showStart(fromMenu) {
   o.hidden = false;
   $('#startBtn').onclick = () => {
     mode = (o.querySelector('input[name=mode]:checked') || {}).value || 'solo-C';
-    deployMode = (o.querySelector('input[name=dep]:checked') || {}).value || 'hist';
+    balance = (o.querySelector('input[name=bal]:checked') || {}).value || 'hist';
     blood = $('#optBlood').checked; o.hidden = true; startGame();
   };
   if (running) $('#resumeBtn').onclick = () => { blood = $('#optBlood').checked; redrawDecals(); o.hidden = true; };
 }
 async function startGame() {
   humans = new Set(mode === 'hot' ? ['R', 'C'] : mode.endsWith('C') ? ['C'] : ['R']);
-  G = newGame(); decals = []; parts = []; floats = []; projs = []; tweens.length = 0; logItems = []; renderLog(); redrawDecals();
+  setBalance(balance); G = newGame(); decals = []; parts = []; floats = []; projs = []; tweens.length = 0; logItems = []; renderLog(); redrawDecals();
   for (const u of G.units) { u.ox = u.oy = 0; u.shake = 0; } syncAll(); deselect(); undoStack = []; evQueue = [];
   { const bd = $('#board'); bd.scrollLeft = (bd.scrollWidth - bd.clientWidth) * .3; }
-  if (deployMode === 'own') {
+  { // Aufstellungsphase immer: historisch übernehmen oder frei verschieben
     for (const s0 of ['R', 'C']) {
       if (!humans.has(s0)) continue;
       if (mode === 'hot') await showHandoff(s0, s0 === 'R' ? 'Spieler Rom stellt auf' : 'Spieler Karthago stellt auf', true);
