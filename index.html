@@ -913,7 +913,7 @@ function paintDecal(d, k) {
   const [x, y] = toPx(k.x, k.y); d.fillStyle = k.col; const s = Math.max(1, S * k.s);
   d.fillRect(Math.round(x), Math.round(y), s, s);
 }
-function addDecal(k) { if (decals.length > 1400) return; decals.push(k); paintDecal(decCv.getContext('2d'), k); }
+function addDecal(k) { if (decals.length > 4000) return; decals.push(k); paintDecal(decCv.getContext('2d'), k); }
 
 // ===== Figuren im Comic-Stil: dicke Tuschekontur, flache Farben, Seitenansicht =====
 const INK = '#2a1d14', U = 8;
@@ -1057,7 +1057,7 @@ const LAYOUT = {
   light: [[.4, .26], [-.3, .18], [.04, -.08]],
   lcav: [[.3, .28], [-.34, .12], [.02, -.1]]
 };
-const FIGK = { inf:.08, cav:.052, light:.078, lcav:.05 };
+const FIGK = { inf:.066, cav:.044, light:.064, lcav:.042 }; // etwas kleinere Figuren: mehr Luft zwischen den Einheiten
 function isDone(u) { return u.status === 'ok' && (u.attacked || (u.mp <= 0 && !targets(G, u).length)); }
 function drawUnit(u, now) {
   const T = TYPES[u.type], P = PLATE[u.side];
@@ -1116,6 +1116,13 @@ function drawUnit(u, now) {
   ctx.fillStyle = '#f3ead2'; ctx.fillRect(-bw / 2, by, bw * Math.max(0, u.str) / 10, bh);
   const m = Math.max(0, u.mor) / T.mor;
   ctx.fillStyle = m > .6 ? '#e8bd3f' : m > .3 ? '#e0823a' : '#d2412d'; ctx.fillRect(-bw / 2, by + bh + 1, bw * Math.min(1, m), bh);
+  // Aktionsmarken: links Bewegung (Pfeil), rechts Angriff (Raute). Leuchtet = noch möglich.
+  if (!deploying && u.status === 'ok' && G.side === u.side && humans.has(u.side)) {
+    const cm = !u.attacked && u.mp > 0, ca = !u.attacked, pr = Math.max(3.5, S * .13), py = by + bh;
+    ctx.lineWidth = Math.max(1.2, S * .04); ctx.strokeStyle = INK;
+    ctx.beginPath(); ctx.moveTo(-bw / 2 - pr * 2.4, py - pr); ctx.lineTo(-bw / 2 - pr * .6, py); ctx.lineTo(-bw / 2 - pr * 2.4, py + pr); ctx.closePath(); ctx.fillStyle = cm ? '#7fe36a' : '#3a3528'; ctx.fill(); ctx.stroke();
+    const rx0 = bw / 2 + pr * 1.6; ctx.beginPath(); ctx.moveTo(rx0, py - pr * 1.1); ctx.lineTo(rx0 + pr * 1.1, py); ctx.lineTo(rx0, py + pr * 1.1); ctx.lineTo(rx0 - pr * 1.1, py); ctx.closePath(); ctx.fillStyle = ca ? '#ff5a3c' : '#3a3528'; ctx.fill(); ctx.stroke();
+  }
   if (routed) {
     const wx = -dir * S * .5; ctx.strokeStyle = INK; ctx.lineWidth = Math.max(2, S * .08); ctx.beginPath(); ctx.moveTo(wx, -S * .1); ctx.lineTo(wx, -S * 1.2); ctx.stroke();
     ctx.fillStyle = '#f4f1ea'; ctx.lineWidth = Math.max(1.2, S * .05); ctx.beginPath(); ctx.rect(wx, -S * 1.2, dir * S * .36, S * .26); ctx.fill(); ctx.stroke();
@@ -1204,7 +1211,7 @@ function burst(u, away, n, kind) {
     const ang = away + (Math.random() - .5) * 1.8, sp = (kind === 'spark' ? 3 : 1.6) * (0.5 + Math.random());
     const life = kind === 'blood' ? 260 + Math.random() * 200 : kind === 'spark' ? 220 : 600;
     parts.push({ kind, x: ax0 + (Math.random() - .5) * .5, y: ay0 + (Math.random() - .5) * .4, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, life, max: life,
-      s: kind === 'blood' ? .03 + Math.random() * .03 : .12, col: ['#7a1414', '#5e0f0f', '#8f1d1a', '#6b1612'][i % 4] });
+      s: kind === 'blood' ? .035 + Math.random() * .06 : .12, col: ['#7a1414', '#5e0f0f', '#8f1d1a', '#6b1612'][i % 4] });
   }
 }
 function syncAll() {
@@ -1274,14 +1281,14 @@ async function playEvent(e) {
         const s = Math.sin(Math.PI * p) * .45; a.ox = dx / L * s; a.oy = dy / L * s;
         if (!hit && p > .5) {
           hit = true; d.shake = 1; burst(d, away, 5, 'spark');
-          if (blood) burst(d, away, Math.min(9, 2 + Math.round(e.dmg * 4)), 'blood');
+          if (blood) burst(d, away, Math.min(26, 6 + Math.round(e.dmg * 10)), 'blood');
           float(d, '−' + dec(e.dmg), '#fff4e0');
           if (e.mlD > .05) float(d, '−' + dec(e.mlD) + ' Moral', '#f1c75b', .28, 250);
           if (e.arc !== 'front' && d.status !== 'routed') float(d, e.arc === 'rear' ? 'Rücken!' : 'Flanke!', '#ff9a4d', .4, 450);
         }
       });
       a.ox = a.oy = 0;
-      if (e.cd > .05) { a.shake = .7; if (blood) burst(a, away + Math.PI, Math.round(e.cd * 5), 'blood'); float(a, '−' + dec(e.cd), '#fff4e0', .3); await wait(150); }
+      if (e.cd > .05) { a.shake = .7; if (blood) burst(a, away + Math.PI, Math.round(e.cd * 12), 'blood'); float(a, '−' + dec(e.cd), '#fff4e0', .3); await wait(150); }
       if (e.arc !== 'front' && e.d.status !== 'dead') addLog(a.side, `${uname(a)} trifft ${uname(d)} in ${e.arc === 'rear' ? 'den Rücken' : 'die Flanke'}.`);
       await wait(120);
       break;
@@ -1289,7 +1296,7 @@ async function playEvent(e) {
     case 'shoot': {
       const { a, d } = e; a.vface = a.face; const now = performance.now(), dot = a.type === 'sling';
       for (let i = 0; i < 7; i++) projs.push({ x0: a.mx + (Math.random() - .5) * .6, y0: a.my + (Math.random() - .5) * .5, x1: d.mx + (Math.random() - .5) * .7, y1: d.my + (Math.random() - .5) * .6, h: dot ? .5 : .9, dot, t0: now + i * 45 / speed, dur: 430 / speed });
-      await wait(560); d.shake = .6; if (blood) burst(d, Math.atan2(d.my - a.my, d.mx - a.mx), Math.round(e.dmg * 4), 'blood');
+      await wait(560); d.shake = .6; if (blood) burst(d, Math.atan2(d.my - a.my, d.mx - a.mx), 3 + Math.round(e.dmg * 10), 'blood');
       float(d, '−' + dec(e.dmg), '#fff4e0', .3); await wait(200); break;
     }
     case 'rout': float(e.u, 'Flucht!', '#ffcf9a', .42, 300); addLog(e.u.side, `${uname(e.u)}: Flucht!`); await wait(250); break;
@@ -1299,7 +1306,7 @@ async function playEvent(e) {
     case 'surr': float(e.u, 'Umzingelt!', '#ff6b5b', .38); addLog(e.u.side, `Umzingelt: ${uname(e.u)}.`); await wait(200); break;
     case 'trapped': float(e.u, 'Eingekesselt!', '#ff6b5b', .42); addLog(e.u.side, `Kein Fluchtweg: ${uname(e.u)} wird niedergemacht.`); await wait(300); break;
     case 'dead': {
-      const u = e.u; if (blood) burst(u, Math.random() * 6, 6, 'blood');
+      const u = e.u; if (blood) burst(u, Math.random() * 6, 30, 'blood');
       for (let i = 0; i < 8; i++) addDecal({ x: u.mx + (Math.random() - .5) * 1.1, y: u.my + (Math.random() - .5) * .8, col: ['#4a3b2a', '#3a2f22', '#5b4a35'][i % 3], s: .06 + Math.random() * .05 });
       if (e.t === 'dead' && !e.trapped) addLog(u.side, `Aufgerieben${e.sur ? ' im Kessel' : ''}: ${uname(u)}.`);
       await tween(600, p => { u.alpha = 1 - p; }); u.gone = true; break;
@@ -1366,7 +1373,7 @@ function renderCard() {
     } else {
       $('#hudName').textContent = G.over ? 'Schlacht beendet' : humans.has(G.side) ? SIDE[G.side] : SIDE[G.side] + ' (KI)';
       $('#hudSub').textContent = `Runde ${Math.min(G.turn, G.maxTurn)} von ${G.maxTurn}`;
-      row.innerHTML = `<span class="hint">${humans.has(G.side) && !busy ? 'Tippe eine eigene Einheit an. Helle Felder: ziehen. Rot: Nahkampf, Orange: Fernkampf. Die helle Kante ist die Front.' : 'Die Truppen bewegen sich …'}</span>`;
+      row.innerHTML = `<span class="hint">${humans.has(G.side) && !busy ? 'Tippe eine eigene Einheit an. Grüner Pfeil: kann noch ziehen. Rote Raute: kann noch angreifen. Die helle Kante ist die Front.' : 'Die Truppen bewegen sich …'}</span>`;
     }
     return;
   }
@@ -1572,7 +1579,7 @@ function showStart(fromMenu) {
       <li>Eingekesselte Einheiten finden keinen Fluchtweg.</li>
       <li>Ein Heer bricht zusammen, wenn es zu viele Kämpfer verloren hat.</li>
     </ul>
-    <div class="opts"><label><input type="checkbox" id="optBlood" ${blood ? 'checked' : ''}> Blutspritzer anzeigen</label></div>
+    <div class="opts"><label><input type="checkbox" id="optBlood" ${blood ? 'checked' : ''}> Blut anzeigen</label></div>
     <div class="start-row"><button class="btn primary" id="startBtn">Schlacht beginnen</button>${running ? '<button class="btn" id="resumeBtn">Weiterspielen</button>' : ''}</div>
     <p class="src">Zahlen gerundet nach Polybios. Die antiken Quellen (Polybios, Livius) weichen teils voneinander ab.</p>
   </div>`;
