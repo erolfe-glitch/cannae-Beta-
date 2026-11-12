@@ -792,14 +792,22 @@ function hexAt(x, y) {
 function pickHex(x, y) {
   const h = hexAt(x, y);
   if (!G) return h;
-  // Zuerst zählt die Figur, die man an dieser Stelle sieht (vorderste Einheit), dann erst das Feld darunter
-  { let f = null, fy = -1e9;
-    for (const u of G.units) { if (!alive(u) || u.gone) continue; const [ux, uy] = hexPx(u.c, u.r); if (Math.abs(x - ux) < S * .46 && y < uy + S * SQ * .25 && y > uy - S * .9 && uy > fy) { fy = uy; f = u; } }
-    if (f) return { c: f.c, r: f.r }; }
-  if (h && unitAt(G, h.c, h.r)) return h;
-  if (h && sel && reach) { const n = reach.get(h.c * 100 + h.r); if (n && !n.occ && n.cost > 0) return h; }
+  const hu = h ? unitAt(G, h.c, h.r) : null;
+  // 1) Mit gewählter Einheit zählt zuerst das Feld unter dem Zeiger: Ziel oder Zugfeld, egal welche Figur davorsteht
+  if (sel && h) {
+    if (hu && tgts.find(t => t.u === hu)) return h;
+    if (!hu && deploying) return h;
+    if (!hu && reach) { const n = reach.get(h.c * 100 + h.r); if (n && !n.occ && n.cost > 0) return h; }
+  }
+  // 2) Sonst der untere Körper der vordersten Figur an dieser Stelle (enger Kasten), dann die Einheit auf dem Feld
+  let f = null, fy = -1e9;
+  for (const u of G.units) { if (!alive(u) || u.gone) continue; const [ux, uy] = hexPx(u.c, u.r); if (Math.abs(x - ux) < S * .42 && y < uy + S * SQ * .45 && y > uy - S * .5 && uy > fy) { fy = uy; f = u; } }
+  if (sel && f && tgts.find(t => t.u === f)) return { c: f.c, r: f.r };
+  if (f) return { c: f.c, r: f.r };
+  if (hu) return h;
+  // 3) Leeres Feld: notfalls die Figur, deren Oberkörper hier hineinragt
   let best = null, by = -1e9;
-  for (const u of G.units) { if (!alive(u)) continue; const [ux, uy] = hexPx(u.c, u.r); if (Math.abs(x - ux) < S * .55 && y < uy && y > uy - S * 1.05 && uy > by) { by = uy; best = u; } }
+  for (const u of G.units) { if (!alive(u)) continue; const [ux, uy] = hexPx(u.c, u.r); if (Math.abs(x - ux) < S * .5 && y < uy && y > uy - S * .95 && uy > by) { by = uy; best = u; } }
   return best ? { c: best.c, r: best.r } : h;
 }
 function seeded(n) { let a = n * 9301 + 49297; return () => { a = (a * 9301 + 49297) % 233280; return a / 233280; }; }
