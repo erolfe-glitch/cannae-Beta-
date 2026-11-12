@@ -146,6 +146,8 @@ html, body { overflow: hidden; }
 .tools .btn { border-width: 2px; border-bottom-width: 4px; padding: 4px 10px; }
 .tools .btn:active { border-bottom-width: 2px; transform: translateY(2px); }
 .board { overflow: hidden; }
+.board.zoomed { overflow: auto; } .board.zoomed .toast, .board.zoomed .logbox, .board.zoomed .banner, .board.zoomed .evcard { position: fixed; }
+.board.zoomed .banner { top: 62px; } .board.zoomed .toast { bottom: 130px; } .board.zoomed .logbox { top: 60px; bottom: 130px; }
 .toast { position: absolute; left: 50%; bottom: 12px; transform: translate(-50%, 8px); max-width: min(92%, 560px); padding: 7px 14px; border-radius: 8px; background: rgba(22,19,14,.92); border: 2px solid var(--line); font-size: 14px; text-align: center; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 4; }
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 .toast.R { border-color: var(--rome); } .toast.C { border-color: var(--carth); }
@@ -216,6 +218,7 @@ html, body { overflow: hidden; }
     <div class="turninfo"><span id="turnNo">Runde 1 / 16</span><span id="sideChip" class="chip R">Rom</span></div>
     <div id="meters" class="meters"></div>
     <div class="tools">
+      <button class="btn" id="btnZoom" title="Vergrößern: größere Figuren, das Feld lässt sich dann verschieben">🔍 1×</button>
       <button class="btn" id="btnSpeed" title="Animationstempo">1×</button>
       <button class="btn" id="btnLog" title="Schlachtbericht">Bericht</button>
       <button class="btn" id="btnFull" title="Vollbild">⛶</button>
@@ -1497,6 +1500,16 @@ $('#btnEnd').onclick = () => {
   if (busy || !humans.has(G.side)) return; undoStack = []; deselect(); nextTurn();
 };
 $('#btnSpeed').onclick = () => { speed = speed >= 3 ? 1 : speed + 1; $('#btnSpeed').textContent = `${speed}×`; };
+let ZOOM = 1;
+$('#btnZoom').onclick = () => {
+  const bd = $('#board'), fx = (bd.scrollLeft + bd.clientWidth / 2) / bd.scrollWidth, fy = (bd.scrollTop + bd.clientHeight / 2) / bd.scrollHeight;
+  ZOOM = ZOOM === 1 ? 1.3 : ZOOM === 1.3 ? 1.6 : 1;
+  $('#btnZoom').textContent = '🔍 ' + String(ZOOM).replace('.', ',') + '×';
+  bd.classList.toggle('zoomed', ZOOM > 1);
+  cv.style.width = ZOOM > 1 ? (bd.clientWidth * ZOOM) + 'px' : ''; cv.style.height = ZOOM > 1 ? (bd.clientHeight * ZOOM) + 'px' : '';
+  resize();
+  bd.scrollLeft = fx * bd.scrollWidth - bd.clientWidth / 2; bd.scrollTop = fy * bd.scrollHeight - bd.clientHeight / 2;
+};
 $('#btnLog').onclick = () => { $('#logBox').hidden = !$('#logBox').hidden; };
 $('#btnFull').onclick = () => { const el = document.documentElement; (document.fullscreenElement ? document.exitFullscreen() : el.requestFullscreen?.())?.catch?.(() => {}); };
 $('#btnMenu').onclick = () => showStart(true);
